@@ -1,5 +1,5 @@
 # Use Python 3.10 slim image to avoid Alpine build issues
-FROM python:3.10-slim
+FROM python:3.10-slim as builder
 
 # Set working directory
 WORKDIR /app
@@ -14,6 +14,17 @@ COPY requirements.txt .
 # Upgrade pip and install dependencies
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
+# -------- Stage 2: Final runtime image --------
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copy only the installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code from builder
+COPY --from=builder /app /app
 
 # Copy the application code
 COPY . .
