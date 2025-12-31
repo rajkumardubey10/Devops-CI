@@ -22,7 +22,7 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # -------- Stage 2: Final runtime image --------
-FROM python:3.10-slim
+FROM gcr.io/distroless/python3-debian12
 
 WORKDIR /app
 
