@@ -8,6 +8,9 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Create install directory explicitly
+RUN mkdir -p /install
+
 # Copy requirements first (for Docker caching)
 COPY requirements.txt .
 
