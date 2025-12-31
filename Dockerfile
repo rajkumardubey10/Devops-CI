@@ -15,6 +15,9 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Copy the application code
+COPY . .
+
 # -------- Stage 2: Final runtime image --------
 FROM python:3.10-slim
 
@@ -25,9 +28,6 @@ COPY --from=builder /install /usr/local
 
 # Copy application code from builder
 COPY --from=builder /app /app
-
-# Copy the application code
-COPY . .
 
 # Expose the port FastAPI will run on
 EXPOSE 8000
