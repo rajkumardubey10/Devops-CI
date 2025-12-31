@@ -1,5 +1,5 @@
 # Use Python 3.10 slim image to avoid Alpine build issues
-FROM python:3.10-slim as builder
+FROM python:3.10-slim AS builder
 
 # Set working directory
 WORKDIR /app
