@@ -29,9 +29,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+    
 
   syntax-check:
     name: Python Syntax Check
@@ -65,3 +63,4 @@ jobs:
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
             -Dsonar.pullrequest.branch=${{ github.head_ref }} \
             -Dsonar.pullrequest.base=${{ github.base_ref }}
+
