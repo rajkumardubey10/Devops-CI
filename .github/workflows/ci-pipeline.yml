@@ -41,7 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Compile Python code
+      - name: Compile Python codes
         run: |
           python -m py_compile $(find src/ -name "*.py")
 
