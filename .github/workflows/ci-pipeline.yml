@@ -18,18 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: checkout
     steps:
-      - name: Setup Java (for SonarQube)
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.10'
-
-      
 
   syntax-check:
     name: Python Syntax Check
@@ -42,25 +34,16 @@ jobs:
       - name: Compile Python codes
         run: |
           python -m py_compile $(find src/ -name "*.py")
-
-  sonar:
-    name: SonarQube PR Scan
-    runs-on: self-hosted
+  
+  Gitleaks-Scan:
+    name: gitleaks 
+    runs-on: ubuntu-latest
     needs: syntax-check
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONARQUBE_PASS }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=my-project \
-            -Dsonar.sources=src \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
-            -Dsonar.pullrequest.base=${{ github.base_ref }}
-
+      - name: gitleaks scans
+        uses: gitleaks/gitleaks-action@v2
+  
