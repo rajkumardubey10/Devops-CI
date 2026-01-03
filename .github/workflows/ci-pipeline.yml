@@ -47,6 +47,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+            fetch-depth: 0
+
 
       - name: gitleaks setup-scans
         uses: gitleaks/gitleaks-action@v2
@@ -79,3 +82,4 @@ jobs:
         severity: 'CRITICAL,HIGH'
 
         
+
