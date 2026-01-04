@@ -41,7 +41,7 @@ jobs:
   
   Gitleaks-Scan:
     name: gitleaks 
-    runs-on: ubuntu-lastest
+    runs-on: self-hosted
     needs: syntax-check
 
     steps:
@@ -82,5 +82,6 @@ jobs:
         severity: 'MEDIUM,CRITICAL,HIGH'
 
         
+
 
 
