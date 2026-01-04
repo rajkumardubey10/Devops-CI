@@ -20,7 +20,7 @@ jobs:
           with:
             projectBaseDir: .
             args: >
-                -Dsonar.projectName=My Project
+                -Dsonar.projectName=My-Project
                 -Dsonar.projectKey=my-projectkey
                 -Dsonar.sources=src
                 -Dsonar.exclusions=**/__pycache__/**,**/*.pyc,**/.github/**
