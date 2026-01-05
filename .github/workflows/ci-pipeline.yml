@@ -53,7 +53,7 @@ jobs:
       - name: Clean temp gitleaks files
         run: |
           sudo rm -rf /tmp/gitleaks*
-          echo "gitleaks.tmp has already been removed."
+          echo "gitleaks.tmp has already been removed from /tmp."
 
       - name: gitleaks setup-scans
         uses: gitleaks/gitleaks-action@v2
