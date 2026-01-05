@@ -65,7 +65,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: rajkumardockerhub/fastapi-ci:latest
+          tags: rajkumardockerhub/fastapi-ci:${{ github.sha }}
           file: ./Dockerfile    
 
   Trivy-Image_Scanning:
@@ -80,7 +80,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.33.1
         with:
             scan-type: image
-            scan-ref: rajkumardockerhub/fastapi-ci:latest
+            scan-ref: rajkumardockerhub/fastapi-ci:${{ github.sha }}
             format: table
             exit-code: '1'
             ignore-unfixed: true
