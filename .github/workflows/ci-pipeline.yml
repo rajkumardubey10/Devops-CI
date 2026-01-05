@@ -50,6 +50,10 @@ jobs:
         with:
             fetch-depth: 0
 
+      - name: Clean temp gitleaks files
+        run: |
+          rm -rf /tmp/gitleaks*
+          echo "gitleaks.tmp has already been removed from /tmp."
 
       - name: gitleaks setup-scans
         uses: gitleaks/gitleaks-action@v2
