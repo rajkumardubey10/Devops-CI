@@ -11,7 +11,7 @@ jobs:
 
     steps:
         - name: Checkout repository 
-          uses: actions/checkout@v6
+          uses: actions/checkout@v4
           with:
             fetch-depth: 0
    
@@ -46,7 +46,7 @@ jobs:
     steps:
 
       - name: Checkout repository 
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -68,13 +68,14 @@ jobs:
           tags: rajkumardockerhub/fastapi-ci:${{ github.sha }}
           file: ./Dockerfile    
 
-  Trivy-Image_Scanning:
+  Trivy-Image-Scanning:
     name: Trivy image Scan
     runs-on: ubuntu-latest
     needs: Docker-Build-and-Push
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@0.33.1
@@ -86,6 +87,33 @@ jobs:
             ignore-unfixed: true
             vuln-type: 'os,library'
             severity: 'CRITICAL,HIGH'
-        
+  
+  Checkout-CD-Repo:
+    name: Getting the access of CD repo
+    runs-on: self-hosted
+    needs: Trivy-Image-Scanning
 
+    steps:
+      - name: Checkout CD repo
+        uses: actions/checkout@v4
+        with:
+          repository: rajkumardubey10/CD-repo-for-Gitops
+          ssh-key: ${{ secrets.GITOPS_DEPLOY_KEY }}
+          path: manifests
+
+      - name: Update image tag using yq
+        run: |
+          yq -i '
+            .spec.template.spec.containers[0].image =
+            "rajkumardockerhub/fastapi-ci:${{ github.sha }}"
+          ' manifests/K8/deployment.yml
+
+      - name: Commit and push manifest update
+        run: |
+          cd manifests
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Update image tag to ${{ github.sha }}"
+          git push
 
