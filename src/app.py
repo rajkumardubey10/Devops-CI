@@ -13,7 +13,7 @@ def home():
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>FastAPI CI Demo with private docker</title>
+        <title>FastAPI CI Demo with private docker Image</title>
         <style>
             body {
                 margin: 0;
