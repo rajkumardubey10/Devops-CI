@@ -13,7 +13,7 @@ def home():
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>FastAPI CI Demo with private docker Image</title>
+        <title>FastAPI CI Demo </title>
         <style>
             body {
                 margin: 0;
@@ -64,7 +64,7 @@ def home():
     </head>
     <body>
         <div class="card">
-            <h1>🚀 FastAPI CI Demo</h1>
+            <h1>🚀 FastAPI CI Demo with private docker Image and running from Kubernetes </h1>
             <p>Hello FastAPI from <b>fix branch</b> for CI demo</p>
 
             <div class="endpoints">
