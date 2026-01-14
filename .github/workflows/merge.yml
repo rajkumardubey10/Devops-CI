@@ -3,6 +3,9 @@ name: Merge CI Pipeline
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
 
 jobs:
   Sonarqube-Scan:
@@ -144,4 +147,5 @@ jobs:
           git add .
           git commit -m "Update image tag to ${{ github.sha }}"
           git push
+
 
