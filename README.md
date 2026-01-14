@@ -96,4 +96,26 @@ Developer raises Pull Request
 ├── Dockerfile
 └── README.md
 ```
+## PR Validation Pipeline (Pull Request Checks)
+
+The following screenshot shows the **PR validation pipeline execution** triggered automatically when a pull request is raised.
+
+
+### What this stage validates
+
+- The pipeline is triggered on **pull request creation or update**.
+- It runs **before merge**, ensuring changes are validated early.
+- No deployment-related actions are performed at this stage.
+
+The PR validation pipeline includes:
+
+- Source code checkout
+- Static checks (syntax / linting)
+- Secret scanning
+- Dependency or vulnerability checks
+- Validation steps required before approval
+
+All checks must pass successfully before the pull request can be approved and merged into the main branch.
+
+This stage ensures that only **verified and reviewed changes** proceed to the merge pipeline, reducing the risk of failures during deployment.
 
