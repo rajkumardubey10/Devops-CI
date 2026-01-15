@@ -4,6 +4,16 @@
 # One-Line Summary :
 ### Implemented a PR-driven, security-gated GitOps CI/CD pipeline where container images are conditionally built, vulnerability-scanned, and promoted to Kubernetes only after approval.
 
+---
+
+## TL;DR
+- PR validation pipeline enforces code review and security checks before merge
+- Merge pipeline conditionally builds, scans, and promotes Docker images
+- GitOps-based Kubernetes delivery using Argo CD
+- Full traceability from Git commit → image → manifest → deployment
+
+---
+
 # Project Requirements :
 #### The client required an automated deployment pipeline for a containerized application running on Kubernetes. The objective was to standardize the deployment process and reduce manual intervention while maintaining control and traceability.
 ### The requirements provided for the project were:
@@ -39,7 +49,16 @@
 
 # Architecture Overview :
 ![Devops CI/CD Project Architecture ](https://github.com/user-attachments/assets/f6de2043-0987-4bf7-8dbb-520cabc6d41c)<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="mermaid-svg-2" width="100%" class="flowchart" style="max-width: 100%;" viewBox="-31.160028076171876 -31.160026168823016 685.5206176757813 3613.3029663085936" height="100%">
+
+
+--- 
+
+## Challenges & Design Trade-offs
+
+- Conditional Docker builds increased pipeline logic complexity but significantly reduced unnecessary image builds and registry usage.
+- Deploy keys limited access scope and improved security but required explicit rotation and access management.
+- SonarQube quality gates increased CI execution time but prevented low-quality code from progressing to deployment.
+
 
 # Tech Stack :
 
@@ -196,4 +215,32 @@ By separating **CI and CD repositories** and using **SSH keys and deploy keys**,
 - Enables clean GitOps workflows
 - Matches real-world enterprise DevOps practices
 
+## 🔁 GitOps Image Tag Update & Docker Registry Verification
+
+This section demonstrates the **GitOps workflow** where the CI pipeline updates the application image tag in the
+CD repository and the same image is available in the Docker registry, ensuring **consistency between CI, CD, and runtime deployments**.
+
+---
+
+## 🖼️ Kubernetes Deployment Image Tag Update (CD Repository)
+
+<img width="1351" height="677" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml" src="https://github.com/user-attachments/assets/ff627ccc-bb8c-4219-af58-f48bd4c60c12" />
+
+---
+## Docker Registry Tag Verification
+<img width="1351" height="1318" alt="hub docker com_repository_docker_rajkumardockerhub_fastapi-ci_tags" src="https://github.com/user-attachments/assets/a6e85ee5-ce49-41b5-a694-719c8b26a582" />
+
+
+This screenshot shows the `deployment.yml` file in the **CD (GitOps) repository** where the Docker image tag has been
+automatically updated by the CI pipeline after a successful merge.
+
+### What this proves:
+- The CI pipeline commits a new image tag into the CD repository
+- The image tag corresponds to the latest Docker image built during the merge pipeline
+- No manual changes are required to update Kubernetes manifests
+- Git becomes the **single source of truth** for deployment state
+
+Example:
+```yaml
+image: rajkumardockerhub/fastapi-ci:c40abbbd5c5be535f604b5ddd6ccf70b70a6c77a
 
