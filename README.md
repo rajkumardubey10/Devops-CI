@@ -96,10 +96,14 @@ Developer raises Pull Request
 ├── Dockerfile
 └── README.md
 ```
-## PR Validation Pipeline (Pull Request Checks)
+## PR Validation Pipeline (Pull Request Checks) :
 
 The following screenshot shows the **PR validation pipeline execution** triggered automatically when a pull request is raised.
+## Screenshot of PR Request open 
+<img width="1351" height="1716" alt="github com_rajkumardubey10_Devops-CI_pull_9" src="https://github.com/user-attachments/assets/cc50ba04-10c3-410f-842f-33bc04ded7b6" />
 
+## Stage view of PR-Validation pipeline 
+<img width="1351" height="802" alt="github com_rajkumardubey10_Devops-CI_actions_workflows_ci-pipeline yml" src="https://github.com/user-attachments/assets/83b05f3d-48be-4763-b2bb-6e851dfd5982" />
 
 ### What this stage validates
 
@@ -118,4 +122,78 @@ The PR validation pipeline includes:
 All checks must pass successfully before the pull request can be approved and merged into the main branch.
 
 This stage ensures that only **verified and reviewed changes** proceed to the merge pipeline, reducing the risk of failures during deployment.
+
+## 🚀 Merge CI Pipeline (Post-Merge Validation) :
+
+<img width="1351" height="1169" alt="github com_rajkumardubey10_Devops-CI_actions_runs_20775615274" src="https://github.com/user-attachments/assets/07bb5b88-6d03-47f7-a2fc-9ede389a51fe" />
+
+
+
+This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request
+was merged into the `main` branch. The pipeline runs automatically on every push to the main branch
+and performs post-merge validations and build steps required for deployment readiness.
+
+The pipeline includes a **SonarQube quality scan** to enforce **code quality gates**, a **Docker build and push**
+step to create the application container image, a **Trivy image vulnerability scan** to ensure container security, and a step to securely access the CD repository for deployment-related updates.
+
+All stages completed successfully, confirming that the merged code meets quality standards, the
+container image is built and scanned without critical vulnerabilities, and the application is
+ready for the continuous delivery process.
+
+## 🖼️ Deploy Key for CD Repository Access :
+<img width="1351" height="879" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml (1)" src="https://github.com/user-attachments/assets/f5b5b330-0ccb-407c-9afb-7b02e0911882" />
+
+This screenshot shows a **Deploy Key configured in the CD (GitOps) repository**.
+
+### What this does:
+- A deploy key is added to the **CD repository** with **read/write access**
+- It allows the **CI pipeline** to securely access the CD repository
+- The CI pipeline uses this access to **update `deployment.yml` files** (for example, updating Docker image tags)
+- This enables **automated GitOps-style deployments** without using personal credentials
+
+### Why deploy keys are used:
+- Limited to a **single repository**
+- More secure than using personal access tokens
+- Ideal for **CI → CD repository communication**
+- Commonly used in production GitOps workflows
+
+---
+## 🖼️ SSH Key for GitHub Authentication (Push & Pull Access)
+
+<img width="1351" height="1229" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml (2)" src="https://github.com/user-attachments/assets/c33e4434-2a88-4c61-b1c3-76e029dddc78" />
+
+
+This screenshot shows an **SSH key added to the GitHub user account**.
+
+### What this does:
+- Enables **passwordless authentication** with GitHub
+- Allows seamless **git pull** and **git push** operations
+- Eliminates repeated username and password prompts required by HTTPS authentication
+
+### Why SSH is preferred over HTTPS:
+- HTTPS requires entering username and password (or token) repeatedly
+- SSH provides **secure, persistent authentication**
+- Essential for automation and CI/CD pipelines
+- Industry-standard approach in professional DevOps environments
+
+---
+
+## 🔄 How CI and CD Repositories Work Together
+
+1. Code is merged into the `main` branch
+2. The **Merge CI pipeline** builds and scans the Docker image
+3. CI pipeline uses the **deploy key** to access the CD repository
+4. The pipeline updates Kubernetes `deployment.yml` with the new image tag
+5. GitOps tools (e.g., Argo CD) detect the change and deploy automatically
+
+---
+
+## 🎯 Key Takeaway
+
+By separating **CI and CD repositories** and using **SSH keys and deploy keys**, this setup:
+- Improves security
+- Avoids credential leakage
+- Enables clean GitOps workflows
+- Matches real-world enterprise DevOps practices
+
 
