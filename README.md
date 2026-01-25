@@ -68,7 +68,9 @@
 | CI Automation | GitHub Actions |
 | Containerization | Docker |
 | Container Registry | Docker Hub |
-| Security Scanning | Trivy |
+| Code Quality | SonarQube |
+| Security Scanning (Secrets) | Gitleaks |
+| Security Scanning (Images) | Trivy |
 | Configuration Management | yq |
 | GitOps Deployment | Argo CD |
 | Container Orchestration | Kubernetes |
@@ -81,11 +83,11 @@ Developer raises Pull Request
 → PR merged into main branch  
 → Merge pipeline triggered  
 → Evaluate file changes (source code / Dockerfile)  
-→ If relevant changes detected:  
+→ If relevant changes detected:
+  → Security gate evaluation 
   → Docker image built  
   → Image pushed to Docker Hub  
-  → Trivy image vulnerability scan  
-  → Security gate evaluation  
+  → Trivy image vulnerability scan    
   → Image tag updated in CD repository using yq  
   → Commit pushed to CD repository  
 → If no relevant changes detected:  
