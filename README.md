@@ -102,19 +102,25 @@ Developer raises Pull Request
 ├── .github/workflows/
 │   ├── pr-validation.yml
 │   └── merge-pipeline.yml
-├── k8s/
-│   ├── deployment.yaml
-│   └── service.yaml
-├── docs/
-│   ├── security-design.md
-│   ├── ci-cd-pipeline.md
-│   └── deployment-flow.md
-├── screenshots/
-│   ├── architecture.png
-│   ├── merge-pipeline-success.png
-│   ├── trivy-pass.png
-│   └── argocd-synced.png
-├── Dockerfile
+├── requirement.in
+├── src
+|    ├── Dockerfile
+|    ├── __pycache__
+|    │   ├── app.cpython-312.pyc
+|    │   └── main.cpython-312.pyc
+|   └── app.py
+├── screenshots
+│   ├── Deploy-key.png
+│   ├── Dockerhub-latest.png
+│   ├── Manifest-image-change.png
+│   ├── Merge-pipeline.png
+│   ├── PR-validation-stage-view.png
+│   ├── PR-validation.png
+│   ├── SSH-key-Authentication.png
+│   └── architecture.png
+├── requirements.txt
+├── .gitignore
+├── .venv
 └── README.md
 ```
 ## PR Validation Pipeline (Pull Request Checks) :
