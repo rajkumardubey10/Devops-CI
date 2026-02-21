@@ -64,7 +64,7 @@ def home():
     </head>
     <body>
         <div class="card">
-            <h1>🚀 FastAPI CI Demo with private secured docker Image and running from Kubernetes </h1>
+            <h1>🚀 FastAPI CI Demo with private secured docker Image and running from Kubernetes  </h1>
             <p>Hello FastAPI from <b>fix branch</b> for CI demo</p>
 
             <div class="endpoints">
@@ -98,4 +98,5 @@ def get_item(item_id: int, q: str | None = None):
         "item_id": item_id,
         "query": q
     }
+
 
