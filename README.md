@@ -4,6 +4,16 @@
 # One-Line Summary :
 ### Implemented a PR-driven, security-gated GitOps CI/CD pipeline where container images are conditionally built, vulnerability-scanned, and promoted to Kubernetes only after approval.
 
+---
+
+## TL;DR
+- PR validation pipeline enforces code review and security checks before merge
+- Merge pipeline conditionally builds, scans, and promotes Docker images
+- GitOps-based Kubernetes delivery using Argo CD
+- Full traceability from Git commit → image → manifest → deployment
+
+---
+
 # Project Requirements :
 #### The client required an automated deployment pipeline for a containerized application running on Kubernetes. The objective was to standardize the deployment process and reduce manual intervention while maintaining control and traceability.
 ### The requirements provided for the project were:
@@ -39,7 +49,16 @@
 
 # Architecture Overview :
 ![Devops CI/CD Project Architecture ](https://github.com/user-attachments/assets/f6de2043-0987-4bf7-8dbb-520cabc6d41c)<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="mermaid-svg-2" width="100%" class="flowchart" style="max-width: 100%;" viewBox="-31.160028076171876 -31.160026168823016 685.5206176757813 3613.3029663085936" height="100%">
+
+
+--- 
+
+## Challenges & Design Trade-offs
+
+- Conditional Docker builds increased pipeline logic complexity but significantly reduced unnecessary image builds and registry usage.
+- Deploy keys limited access scope and improved security but required explicit rotation and access management.
+- SonarQube quality gates increased CI execution time but prevented low-quality code from progressing to deployment.
+
 
 # Tech Stack :
 
@@ -49,7 +68,9 @@
 | CI Automation | GitHub Actions |
 | Containerization | Docker |
 | Container Registry | Docker Hub |
-| Security Scanning | Trivy |
+| Code Quality | SonarQube |
+| Security Scanning (Secrets) | Gitleaks |
+| Security Scanning (Images) | Trivy |
 | Configuration Management | yq |
 | GitOps Deployment | Argo CD |
 | Container Orchestration | Kubernetes |
@@ -62,11 +83,11 @@ Developer raises Pull Request
 → PR merged into main branch  
 → Merge pipeline triggered  
 → Evaluate file changes (source code / Dockerfile)  
-→ If relevant changes detected:  
+→ If relevant changes detected:
+  → Security gate evaluation 
   → Docker image built  
   → Image pushed to Docker Hub  
-  → Trivy image vulnerability scan  
-  → Security gate evaluation  
+  → Trivy image vulnerability scan    
   → Image tag updated in CD repository using yq  
   → Commit pushed to CD repository  
 → If no relevant changes detected:  
@@ -96,10 +117,14 @@ Developer raises Pull Request
 ├── Dockerfile
 └── README.md
 ```
-## PR Validation Pipeline (Pull Request Checks)
+## PR Validation Pipeline (Pull Request Checks) :
 
 The following screenshot shows the **PR validation pipeline execution** triggered automatically when a pull request is raised.
+## Screenshot of PR Request open 
+<img width="1351" height="1716" alt="github com_rajkumardubey10_Devops-CI_pull_9" src="https://github.com/user-attachments/assets/cc50ba04-10c3-410f-842f-33bc04ded7b6" />
 
+## Stage view of PR-Validation pipeline 
+<img width="1351" height="802" alt="github com_rajkumardubey10_Devops-CI_actions_workflows_ci-pipeline yml" src="https://github.com/user-attachments/assets/83b05f3d-48be-4763-b2bb-6e851dfd5982" />
 
 ### What this stage validates
 
@@ -118,4 +143,106 @@ The PR validation pipeline includes:
 All checks must pass successfully before the pull request can be approved and merged into the main branch.
 
 This stage ensures that only **verified and reviewed changes** proceed to the merge pipeline, reducing the risk of failures during deployment.
+
+## 🚀 Merge CI Pipeline (Post-Merge Validation) :
+
+<img width="1351" height="1169" alt="github com_rajkumardubey10_Devops-CI_actions_runs_20775615274" src="https://github.com/user-attachments/assets/07bb5b88-6d03-47f7-a2fc-9ede389a51fe" />
+
+
+
+This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request
+was merged into the `main` branch. The pipeline runs automatically on every push to the main branch
+and performs post-merge validations and build steps required for deployment readiness.
+
+The pipeline includes a **SonarQube quality scan** to enforce **code quality gates**, a **Docker build and push**
+step to create the application container image, a **Trivy image vulnerability scan** to ensure container security, and a step to securely access the CD repository for deployment-related updates.
+
+All stages completed successfully, confirming that the merged code meets quality standards, the
+container image is built and scanned without critical vulnerabilities, and the application is
+ready for the continuous delivery process.
+
+## 🖼️ Deploy Key for CD Repository Access :
+<img width="1351" height="879" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml (1)" src="https://github.com/user-attachments/assets/f5b5b330-0ccb-407c-9afb-7b02e0911882" />
+
+This screenshot shows a **Deploy Key configured in the CD (GitOps) repository**.
+
+### What this does:
+- A deploy key is added to the **CD repository** with **read/write access**
+- It allows the **CI pipeline** to securely access the CD repository
+- The CI pipeline uses this access to **update `deployment.yml` files** (for example, updating Docker image tags)
+- This enables **automated GitOps-style deployments** without using personal credentials
+
+### Why deploy keys are used:
+- Limited to a **single repository**
+- More secure than using personal access tokens
+- Ideal for **CI → CD repository communication**
+- Commonly used in production GitOps workflows
+
+---
+## 🖼️ SSH Key for GitHub Authentication (Push & Pull Access)
+
+<img width="1351" height="1229" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml (2)" src="https://github.com/user-attachments/assets/c33e4434-2a88-4c61-b1c3-76e029dddc78" />
+
+
+This screenshot shows an **SSH key added to the GitHub user account**.
+
+### What this does:
+- Enables **passwordless authentication** with GitHub
+- Allows seamless **git pull** and **git push** operations
+- Eliminates repeated username and password prompts required by HTTPS authentication
+
+### Why SSH is preferred over HTTPS:
+- HTTPS requires entering username and password (or token) repeatedly
+- SSH provides **secure, persistent authentication**
+- Essential for automation and CI/CD pipelines
+- Industry-standard approach in professional DevOps environments
+
+---
+
+## 🔄 How CI and CD Repositories Work Together
+
+1. Code is merged into the `main` branch
+2. The **Merge CI pipeline** builds and scans the Docker image
+3. CI pipeline uses the **deploy key** to access the CD repository
+4. The pipeline updates Kubernetes `deployment.yml` with the new image tag
+5. GitOps tools (e.g., Argo CD) detect the change and deploy automatically
+
+---
+
+## 🎯 Key Takeaway
+
+By separating **CI and CD repositories** and using **SSH keys and deploy keys**, this setup:
+- Improves security
+- Avoids credential leakage
+- Enables clean GitOps workflows
+- Matches real-world enterprise DevOps practices
+
+## 🔁 GitOps Image Tag Update & Docker Registry Verification
+
+This section demonstrates the **GitOps workflow** where the CI pipeline updates the application image tag in the
+CD repository and the same image is available in the Docker registry, ensuring **consistency between CI, CD, and runtime deployments**.
+
+---
+
+## 🖼️ Kubernetes Deployment Image Tag Update (CD Repository)
+
+<img width="1351" height="677" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml" src="https://github.com/user-attachments/assets/ff627ccc-bb8c-4219-af58-f48bd4c60c12" />
+
+---
+## Docker Registry Tag Verification
+<img width="1351" height="1318" alt="hub docker com_repository_docker_rajkumardockerhub_fastapi-ci_tags" src="https://github.com/user-attachments/assets/a6e85ee5-ce49-41b5-a694-719c8b26a582" />
+
+
+This screenshot shows the `deployment.yml` file in the **CD (GitOps) repository** where the Docker image tag has been
+automatically updated by the CI pipeline after a successful merge.
+
+### What this proves:
+- The CI pipeline commits a new image tag into the CD repository
+- The image tag corresponds to the latest Docker image built during the merge pipeline
+- No manual changes are required to update Kubernetes manifests
+- Git becomes the **single source of truth** for deployment state
+
+Example:
+```yaml
+image: rajkumardockerhub/fastapi-ci:c40abbbd5c5be535f604b5ddd6ccf70b70a6c77a
 
