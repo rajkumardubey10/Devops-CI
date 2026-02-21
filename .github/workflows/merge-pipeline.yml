@@ -109,7 +109,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.33.1
         with:
             scan-type: image
-            scan-ref: rajkumardockerhub/fastapi-ci:${{ github.sha }}
+            scan-ref: rajkumardockerhub/fastapi-app-multistage:${{ github.sha }}
             format: table
             exit-code: '1'
             ignore-unfixed: true
@@ -135,7 +135,7 @@ jobs:
         run: |
           yq -i '
             .spec.template.spec.containers[0].image =
-            "rajkumardockerhub/fastapi-ci:${{ github.sha }}"
+            "rajkumardockerhub/fastapi-app-multistage:${{ github.sha }}"
           ' manifests/K8/deployment.yml
 
       - name: Commit and push manifest update
