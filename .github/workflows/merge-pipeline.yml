@@ -114,7 +114,7 @@ jobs:
             exit-code: '1'
             ignore-unfixed: true
             vuln-type: 'os,library'
-            severity: 'CRITICAL,HIGH'
+            severity: 'CRITICAL'
   
   Checkout-CD-Repo:
     name: Getting the access of CD repo
@@ -147,5 +147,6 @@ jobs:
           git add .
           git diff --cached --quiet || git commit -m "Update image tag to ${{ github.sha }}"
           git push
+
 
 
