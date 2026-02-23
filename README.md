@@ -154,8 +154,6 @@ This stage ensures that only **verified and reviewed changes** proceed to the me
 
 <img width="1351" height="1169" alt="github com_rajkumardubey10_Devops-CI_actions_runs_20775615274" src="https://github.com/user-attachments/assets/07bb5b88-6d03-47f7-a2fc-9ede389a51fe" />
 
-
-
 This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request
 was merged into the `main` branch. The pipeline runs automatically on every push to the main branch
 and performs post-merge validations and build steps required for deployment readiness.
@@ -165,7 +163,46 @@ step to create the application container image, a **Trivy image vulnerability sc
 
 All stages completed successfully, confirming that the merged code meets quality standards, the
 container image is built and scanned without critical vulnerabilities, and the application is
-ready for the continuous delivery process.
+ready for the continuous delivery process
+
+---
+
+## 🔴 SonarQube Quality Gate — FAILED
+
+<img width="1366" height="768" alt="sonarqube-qualitygate-failed" src="https://github.com/user-attachments/assets/4ce38f3d-03d7-4ba7-9c21-a4729f4b8ff1" />
+
+**Description**  
+- This GitHub Actions workflow failed during the **SonarQube Quality Gate check**.  
+- Although the SonarQube analysis step completed successfully, the Quality Gate evaluation returned a **FAILED status**, causing the pipeline to exit with a non-zero code.
+
+The pipeline is intentionally configured to **fail fast** when code quality, security, or coverage thresholds are not met, ensuring that non-compliant code is blocked before reaching build or deployment stages.
+
+---
+
+## 🟢 SonarQube Quality Gate — PASSED
+
+<img width="1366" height="768" alt="sonarqube-qualitygate-pass" src="https://github.com/user-attachments/assets/c3045823-c727-468d-bc4d-de841a38a5dd" />
+
+**Description**  
+- This GitHub Actions workflow successfully passed the **SonarQube Quality Gate**.  
+- The analysis met all configured quality, security, and coverage conditions, allowing the pipeline to continue without interruption.
+  
+A successful Quality Gate validation confirms that the codebase complies with defined standards and is eligible to proceed to subsequent stages such as Docker image build and deployment.
+
+---
+
+## 🔴 Trivy Vulnerability Scan — FAILED
+
+<img width="1366" height="768" alt="trivy-scan-failed" src="https://github.com/user-attachments/assets/87a851c3-2d19-4630-9041-e2fa994d606f" />
+
+**Description**  
+- This CI pipeline execution failed during the **Trivy vulnerability scanning stage**, which is configured to run in **fail-safe mode**.  
+- The scan detected multiple **HIGH severity vulnerabilities** within project dependencies, causing the job to exit with a non-zero status.
+
+As part of secure CI/CD enforcement, the pipeline was automatically stopped to prevent the build and deployment of artifacts containing known security risks.  
+This demonstrates proactive **container and dependency security scanning** aligned with DevSecOps best practices.
+
+---
 
 ## 🖼️ Deploy Key for CD Repository Access :
 <img width="1351" height="879" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml (1)" src="https://github.com/user-attachments/assets/f5b5b330-0ccb-407c-9afb-7b02e0911882" />
