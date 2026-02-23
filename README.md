@@ -251,4 +251,5 @@ automatically updated by the CI pipeline after a successful merge.
 Example:
 ```yaml
 image: rajkumardockerhub/fastapi-ci:c40abbbd5c5be535f604b5ddd6ccf70b70a6c77a
-
+```
+For CD Part Checkout this Repo Link : https://github.com/rajkumardubey10/CD-repo-for-Gitops.git
