@@ -1,5 +1,5 @@
 # Project Title :
-### Controlled CI/CD Pipeline with PR Governance, Security Validation, and Argo CD-Based Kubernetes Delivery
+### Controlled CI/CD Pipeline with PR Governance, Security Validation, and Argo CD-Based Kubernetes Delivery.
 
 # One-Line Summary :
 ### Implemented a PR-driven, security-gated GitOps CI/CD pipeline where container images are conditionally built, vulnerability-scanned, and promoted to Kubernetes only after approval.
