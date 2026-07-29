@@ -6,6 +6,13 @@
 
 ---
 
+> **Note:** This repository is a self-built demonstration of the architecture and 
+> approach delivered for this client engagement. It does not contain the client's 
+> actual codebase, credentials, or proprietary configuration — the application code, 
+> pipeline logic, and infrastructure shown here were independently rebuilt to 
+> demonstrate the solution publicly, since the original client environment cannot 
+> be shared for confidentiality reasons.
+
 ## TL;DR
 - PR validation pipeline enforces code review and security checks before merge
 - Merge pipeline conditionally builds, scans, and promotes Docker images
