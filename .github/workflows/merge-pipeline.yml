@@ -147,5 +147,106 @@ jobs:
           git diff --cached --quiet || git commit -m "Update image tag to ${{ github.sha }}"
           git push origin assessment
 
+  Staging-Verification:
+    name: Staging Smoke Test
+    runs-on: self-hosted
+    needs: Checkout-CD-Repo
+
+    steps:
+      - name: Check Kubernetes rollout
+        run: |
+          kubectl rollout status deployment/fastapi-deployment --timeout=180s
+
+      - name: Smoke test staging
+        run: |
+          curl --fail --retry 10 --retry-delay 5 \
+            http://localhost:30000/health
+
+  Production-Approval:
+    name: Production Approval
+    runs-on: ubuntu-latest
+    needs: Staging-Verification
+    environment:
+      name: production
+
+    steps:
+      - name: Approval gate passed
+        run: echo "Production approval received from GitHub Environment protection rule."
+  
+  Production-Deployment:
+    name: Deploy to Production
+    runs-on: self-hosted
+    needs: Staging-Verification
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v4
+        with:
+          repository: rajkumardubey10/CD-repo-for-Gitops
+          ref: assessment
+          ssh-key: ${{ secrets.GITOPS_DEPLOY_KEY }}
+          path: manifests
+
+      - name: Update production image
+        run: |
+          yq -i '
+            .spec.template.spec.containers[0].image =
+            "rajkumardockerhub/fastapi-app-multistage:${{ github.sha }}"
+          ' manifests/K8/production/deployment.yml
+
+      - name: Commit and push production manifest
+        run: |
+          cd manifests
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "Deploy ${{ github.sha }} to production"
+          git push origin assessment
 
 
+  Slack-Notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - Sonarqube-Scan
+      - Docker-Build-and-Push
+      - Trivy-Image-Scanning
+      - Checkout-CD-Repo
+      - Staging-Verification
+      - Production-Deployment
+
+    steps:
+      - name: Send Slack notification
+        run: |
+          if [[ \
+            "${{ needs.Sonarqube-Scan.result }}" == "failure" || \
+            "${{ needs.Docker-Build-and-Push.result }}" == "failure" || \
+            "${{ needs.Trivy-Image-Scanning.result }}" == "failure" || \
+            "${{ needs.Checkout-CD-Repo.result }}" == "failure" || \
+            "${{ needs.Staging-Verification.result }}" == "failure" || \
+            "${{ needs.Production-Deployment.result }}" == "failure" \
+          ]]; then
+            STATUS="FAILED"
+            MESSAGE="🚨 CI/CD Pipeline Failed"
+          else
+            STATUS="SUCCESS"
+            MESSAGE="✅ CI/CD Pipeline Succeeded"
+          fi
+
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data "{
+              \"text\": \"$MESSAGE
+
+Repository: ${{ github.repository }}
+Branch: ${{ github.ref_name }}
+Commit: ${{ github.sha }}
+Workflow: ${{ github.workflow }}
+Status: $STATUS
+Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+            }" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
