@@ -222,34 +222,43 @@ jobs:
     steps:
       - name: Send Slack notification
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL}}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          if [[ \
-            "${{ needs.Sonarqube-Scan.result }}" == "failure" || \
-            "${{ needs.Docker-Build-and-Push.result }}" == "failure" || \
-            "${{ needs.Trivy-Image-Scanning.result }}" == "failure" || \
-            "${{ needs.Checkout-CD-Repo.result }}" == "failure" || \
-            "${{ needs.Staging-Verification.result }}" == "failure" || \
-            "${{ needs.Production-Deployment.result }}" == "failure" \
-          ]]; then
+          STATUS="SUCCESS"
+          FAILED_STAGE="None"
+
+          if [[ "${{ needs.Sonarqube-Scan.result }}" == "failure" ]]; then
             STATUS="FAILED"
-            MESSAGE="🚨 CI/CD Pipeline Failed"
-          else
-            STATUS="SUCCESS"
+            FAILED_STAGE="SonarQube Scan"
+
+          elif [[ "${{ needs.Docker-Build-and-Push.result }}" == "failure" ]]; then
+            STATUS="FAILED"
+            FAILED_STAGE="Docker Build and Push"
+
+          elif [[ "${{ needs.Trivy-Image-Scanning.result }}" == "failure" ]]; then
+            STATUS="FAILED"
+            FAILED_STAGE="Trivy Image Scan"
+
+          elif [[ "${{ needs.Checkout-CD-Repo.result }}" == "failure" ]]; then
+            STATUS="FAILED"
+            FAILED_STAGE="GitOps Manifest Update"
+
+          elif [[ "${{ needs.Staging-Verification.result }}" == "failure" ]]; then
+            STATUS="FAILED"
+            FAILED_STAGE="Staging Verification"
+
+          elif [[ "${{ needs.Production-Deployment.result }}" == "failure" ]]; then
+            STATUS="FAILED"
+            FAILED_STAGE="Production Deployment"
+          fi
+
+          if [[ "$STATUS" == "SUCCESS" ]]; then
             MESSAGE="✅ CI/CD Pipeline Succeeded"
+          else
+            MESSAGE="🚨 CI/CD Pipeline Failed"
           fi
 
           curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \"$MESSAGE}" \
-            "${{ secrets.SLACK_WEBHOOK_URL }}"
-
-# Repository: ${{ github.repository }}
-# Branch: ${{ github.ref_name }}
-# Commit: ${{ github.sha }}
-# Workflow: ${{ github.workflow }}
-# Status: $STATUS
-# Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-#             }" \
-#             "${{ secrets.SLACK_WEBHOOK_URL }}"
+            -H "Content-Type: application/json" \
+            --data "{\"text\":\"$MESSAGE\n\nStage: $FAILED_STAGE\nStatus: $STATUS\n\n🔍 View Pipeline Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            "$SLACK_WEBHOOK_URL"
