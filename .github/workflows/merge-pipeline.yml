@@ -242,7 +242,8 @@ jobs:
           curl -X POST \
             -H 'Content-type: application/json' \
             --data "{
-              \"text\": \"$MESSAGE
+              \"text\": \"$MESSAGE}" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
 
 # Repository: ${{ github.repository }}
 # Branch: ${{ github.ref_name }}
