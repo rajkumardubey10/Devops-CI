@@ -2,7 +2,7 @@ name: Merge CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ assessment ]
     paths-ignore:
       - 'README.md'
       - 'docs/**'
@@ -35,8 +35,6 @@ jobs:
         - name: SonarQube Quality Gate check
           id: sonarqube-quality-gate-check
           uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
-          with:
-           pollingTimeoutSec: 600
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }} 
@@ -106,7 +104,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner in fs mode
         if: needs.Docker-Build-and-Push.outputs.app_changed== 'true'
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
             scan-type: image
             scan-ref: rajkumardockerhub/fastapi-app-multistage:${{ github.sha }}
@@ -122,11 +120,12 @@ jobs:
     needs: Trivy-Image-Scanning
 
     steps:
-      - name: Checkout CD repo
+      - name: Update-GitOps-Manifest
         if: needs.Trivy-Image-Scanning.outputs.app_changed == 'true'
         uses: actions/checkout@v4
         with:
           repository: rajkumardubey10/CD-repo-for-Gitops
+          ref: assessment
           ssh-key: ${{ secrets.GITOPS_DEPLOY_KEY }}
           path: manifests
 
@@ -146,7 +145,7 @@ jobs:
           git config user.email "github-actions@github.com"
           git add .
           git diff --cached --quiet || git commit -m "Update image tag to ${{ github.sha }}"
-          git push
+          git push origin assessment
 
 
 
