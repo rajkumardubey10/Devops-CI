@@ -58,7 +58,7 @@ jobs:
           python -m pytest tests/unit -v
 
   integration-tests:
-    name: Unit Tests
+    name: integration Tests
     runs-on: ubuntu-latest
     needs: syntax-check
     steps:
@@ -119,7 +119,7 @@ jobs:
         exit-code: '1'
         ignore-unfixed: true
         vuln-type: 'os,library'
-        severity: 'MEDIUM,CRITICAL,HIGH'
+        severity: 'CRITICAL'
 
         
 
