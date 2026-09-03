@@ -221,6 +221,8 @@ jobs:
 
     steps:
       - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL}}
         run: |
           if [[ \
             "${{ needs.Sonarqube-Scan.result }}" == "failure" || \
