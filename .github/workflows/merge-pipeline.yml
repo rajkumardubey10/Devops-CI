@@ -244,11 +244,11 @@ jobs:
             --data "{
               \"text\": \"$MESSAGE
 
-Repository: ${{ github.repository }}
-Branch: ${{ github.ref_name }}
-Commit: ${{ github.sha }}
-Workflow: ${{ github.workflow }}
-Status: $STATUS
-Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
-            }" \
-            "${{ secrets.SLACK_WEBHOOK_URL }}"
+# Repository: ${{ github.repository }}
+# Branch: ${{ github.ref_name }}
+# Commit: ${{ github.sha }}
+# Workflow: ${{ github.workflow }}
+# Status: $STATUS
+# Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+#             }" \
+#             "${{ secrets.SLACK_WEBHOOK_URL }}"
