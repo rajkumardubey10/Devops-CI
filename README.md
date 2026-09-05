@@ -151,10 +151,10 @@ Developer raises Pull Request
 
 The following screenshot shows the **PR validation pipeline execution** triggered automatically when a pull request is raised.
 ## Screenshot of PR Request open 
-<img width="1351" height="1716" alt="github com_rajkumardubey10_Devops-CI_pull_9" src="https://github.com/user-attachments/assets/cc50ba04-10c3-410f-842f-33bc04ded7b6" />
+<img width="1366" height="768" alt="octa_pr_validation" src="https://github.com/user-attachments/assets/c21220e9-d5a2-4a18-b4e6-9d9d5cd23671" />
 
 ## Stage view of PR-Validation pipeline 
-<img width="1351" height="802" alt="github com_rajkumardubey10_Devops-CI_actions_workflows_ci-pipeline yml" src="https://github.com/user-attachments/assets/83b05f3d-48be-4763-b2bb-6e851dfd5982" />
+<img width="1366" height="768" alt="octa_pipline" src="https://github.com/user-attachments/assets/2d7ec159-908c-4caf-9cc5-57f61e0184f0" />
 
 ### What this stage validates
 
@@ -176,7 +176,7 @@ This stage ensures that only **verified and reviewed changes** proceed to the me
 
 ## 🚀 Merge CI Pipeline (Post-Merge Validation) :
 
-<img width="1351" height="1169" alt="github com_rajkumardubey10_Devops-CI_actions_runs_20775615274" src="https://github.com/user-attachments/assets/07bb5b88-6d03-47f7-a2fc-9ede389a51fe" />
+<img width="1366" height="768" alt="merge_pipeline" src="https://github.com/user-attachments/assets/8a1f7771-d7b6-4d1c-8ba8-410bb6247118" />
 
 This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request was merged into the `assessment` branch.
 
@@ -184,7 +184,8 @@ The pipeline performs SonarQube quality validation, Docker image build and push,
 
 All required stages completed successfully, confirming that the application passed CI validation and was successfully promoted through the staging and production deployment flow.
 
-![Merge Pipeline](screenshots/Merge-pipeline.png)
+<img width="1366" height="768" alt="docker_build_artifact_and_approval" src="https://github.com/user-attachments/assets/c94fe636-3a72-4bea-957f-08bfe69ecf6d" />
+
 
 ---
 
@@ -298,11 +299,11 @@ CD repository and the same image is available in the Docker registry, ensuring *
 
 ## 🖼️ Kubernetes Deployment Image Tag Update (CD Repository)
 
-<img width="1351" height="677" alt="github com_rajkumardubey10_CD-repo-for-Gitops_blob_main_K8_deployment yml" src="https://github.com/user-attachments/assets/ff627ccc-bb8c-4219-af58-f48bd4c60c12" />
+<img width="1366" height="768" alt="manifest_image_tag" src="https://github.com/user-attachments/assets/973f9e7f-4945-49a8-a1d8-fa9f140e6f36" />
 
 ---
 ## Docker Registry Tag Verification
-<img width="1351" height="1318" alt="hub docker com_repository_docker_rajkumardockerhub_fastapi-ci_tags" src="https://github.com/user-attachments/assets/a6e85ee5-ce49-41b5-a694-719c8b26a582" />
+<img width="1366" height="768" alt="docker_verfiy_tag" src="https://github.com/user-attachments/assets/19b992bb-b83f-4155-94b2-c00d978ffa04" />
 
 
 This screenshot shows the `deployment.yml` file in the **CD (GitOps) repository** where the Docker image tag has been
@@ -316,7 +317,7 @@ automatically updated by the CI pipeline after a successful merge.
 
 Example:
 ```yaml
-image: rajkumardockerhub/fastapi-ci:c40abbbd5c5be535f604b5ddd6ccf70b70a6c77a
+image: rajkumardockerhub/fastapi-app-multistage:c15cd1ba9f733261f0c226ef81f7ef37a52ac10f
 ```
 For CD Part Checkout this Repo Link : https://github.com/rajkumardubey10/CD-repo-for-Gitops.git
 
@@ -337,6 +338,9 @@ The pipeline then verifies the staging deployment before production promotion.
 
 The smoke test validates:
 
+<img width="1366" height="768" alt="smoke_test_ss" src="https://github.com/user-attachments/assets/8e186a38-bc5d-479b-a324-b3a41c5fe2bd" />
+
+
 ```text
 GET /health
 Expected response: {"status":"ok"}
@@ -345,11 +349,15 @@ Expected response: {"status":"ok"}
 
 ## 🔐 Manual Production Deployment Approval
 
+<img width="1366" height="768" alt="manual_approval" src="https://github.com/user-attachments/assets/1c99d8fe-57cd-4cd8-9fce-10dd4f8e761b" />
+
 Production deployment is protected using a GitHub Environment with manual approval.
 
 After the staging deployment and smoke test succeed, the pipeline pauses and waits for an authorized reviewer to approve the production deployment.
 
 ### Production deployment flow
+
+<img width="1366" height="768" alt="approving _deployment " src="https://github.com/user-attachments/assets/c05480b2-a274-4123-84e3-631130dd06e6" />
 
 ```text
 Staging Deployment
@@ -376,8 +384,19 @@ The pipeline sends notifications for both successful and failed executions.
 * Failed stage information when applicable
 
 Example failure notification:
+<img width="1366" height="768" alt="failed_slack_notificaiton" src="https://github.com/user-attachments/assets/ea4d4690-536c-4c23-8ad2-9fb621cf91ac" />
 
 ```text
 CI/CD Pipeline Failed
 Stage: Staging Verification
 Status: FAILED
+```
+
+Example success notification:
+<img width="1366" height="768" alt="successful_run_slack_notification " src="https://github.com/user-attachments/assets/6b6d5524-1834-4efb-adba-6e0b8ab429a2" />
+
+```text
+CI/CD Pipeline Success
+Stage: None
+Status: SUCCESSFUL
+```
