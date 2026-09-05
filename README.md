@@ -62,6 +62,9 @@
 #### This approach ensures controlled deployments, reduces redundant builds, and keeps the deployment process efficient, traceable, and aligned with GitOps practices.
 
 # Architecture Overview :
+
+<img width="1750" height="899" alt="ChatGPT Image Sep 5, 2026, 04_38_23 PM" src="https://github.com/user-attachments/assets/89c96c53-5218-4c6b-96ef-22c14c96c7b3" />
+
 ![Devops CI/CD Project Architecture ](https://github.com/user-attachments/assets/f6de2043-0987-4bf7-8dbb-520cabc6d41c)<?xml version="1.0" encoding="UTF-8"?>
 
 
