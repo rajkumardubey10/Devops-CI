@@ -14,10 +14,14 @@
 > be shared for confidentiality reasons.
 
 ## TL;DR
-- PR validation pipeline enforces code review and security checks before merge
-- Merge pipeline conditionally builds, scans, and promotes Docker images
-- GitOps-based Kubernetes delivery using Argo CD
-- Full traceability from Git commit → image → manifest → deployment
+
+* PR validation pipeline enforces code review and security checks before merge
+* Merge pipeline conditionally builds, scans, and promotes Docker images
+* GitOps-based Kubernetes delivery using Argo CD
+* Staging deployment is verified using Kubernetes rollout checks and smoke tests
+* Production deployment requires manual approval
+* Slack notifications provide CI/CD success and failure visibility
+* Full traceability from Git commit → image → manifest → deployment
 
 ---
 
@@ -51,6 +55,9 @@
 - Kubernetes manifests are maintained in a separate repository to follow GitOps principles.
 - Application deployment is handled by Argo CD based on changes committed to the manifest repository.
 - Rollbacks are handled by reverting manifest changes in Git, without manual access to the Kubernetes cluster.
+- Staging deployments are verified using Kubernetes rollout checks and HTTP smoke tests before production promotion.
+- Production deployment is protected by a manual approval gate using GitHub Environments.
+- Slack notifications provide visibility into successful and failed CI/CD executions.
 
 #### This approach ensures controlled deployments, reduces redundant builds, and keeps the deployment process efficient, traceable, and aligned with GitOps practices.
 
@@ -65,6 +72,8 @@
 - Conditional Docker builds increased pipeline logic complexity but significantly reduced unnecessary image builds and registry usage.
 - Deploy keys limited access scope and improved security but required explicit rotation and access management.
 - SonarQube quality gates increased CI execution time but prevented low-quality code from progressing to deployment.
+- Staging verification added an additional validation step after GitOps deployment, ensuring the application is actually running and responding before production promotion.
+- Manual production approval adds a controlled human checkpoint, preventing automatic promotion of every successful staging deployment.
 
 
 # Tech Stack :
@@ -81,53 +90,61 @@
 | Configuration Management | yq |
 | GitOps Deployment | Argo CD |
 | Container Orchestration | Kubernetes |
+| Deployment Verification | Kubernetes Rollout + HTTP Smoke Test |
+| Deployment Governance | GitHub Environments |
+| Notifications | Slack |
 
 # CI/CD & GitOps Workflow :
 ```
-Developer raises Pull Request  
-→ PR validation pipeline runs  
-→ PR reviewed and approved  
-→ PR merged into main branch  
-→ Merge pipeline triggered  
-→ Evaluate file changes (source code / Dockerfile)  
+Developer raises Pull Request
+→ PR validation pipeline runs
+→ PR reviewed and approved
+→ PR merged into assessment branch
+→ Merge pipeline triggered
+→ SonarQube quality gate
+→ Evaluate file changes (source code / Dockerfile)
 → If relevant changes detected:
-  → Security gate evaluation 
-  → Docker image built  
-  → Image pushed to Docker Hub  
-  → Trivy image vulnerability scan    
-  → Image tag updated in CD repository using yq  
-  → Commit pushed to CD repository  
-→ If no relevant changes detected:  
-  → Skip image build, scan, and promotion  
-→ Argo CD detects manifest change (if any)  
-→ Argo CD syncs desired state  
+    → Docker image built
+    → Image pushed to Docker Hub
+    → Trivy image vulnerability scan
+    → Image tag updated in CD repository using yq
+    → Commit pushed to CD repository
+→ If no relevant changes detected:
+    → Skip image build, scan, and promotion
+→ Argo CD detects manifest change
+→ Argo CD syncs desired state
 → Kubernetes deploys application
+→ Staging rollout verification
+→ Staging smoke test
+→ Manual production approval
+→ Production deployment
+→ Slack notification
 ```
 # Project File-Structure :
 ```
 .
-├── .github/workflows/
-│   ├── pr-validation.yml
-│   └── merge-pipeline.yml
-├── requirement.in
-├── src
-|    ├── Dockerfile
-|    ├── __pycache__
-|    │   ├── app.cpython-312.pyc
-|    │   └── main.cpython-312.pyc
-|   └── app.py
-├── screenshots
-│   ├── Deploy-key.png
-│   ├── Dockerhub-latest.png
-│   ├── Manifest-image-change.png
-│   ├── Merge-pipeline.png
-│   ├── PR-validation-stage-view.png
+├── .github/
+│   └── workflows/
+│       ├── pr-validation.yml
+│       └── merge-pipeline.yml
+├── src/
+│   ├── Dockerfile
+│   └── app.py
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── screenshots/
+│   ├── architecture.png
 │   ├── PR-validation.png
-│   ├── SSH-key-Authentication.png
-│   └── architecture.png
+│   ├── PR-validation-stage-view.png
+│   ├── SonarQube-quality-gate.png
+│   ├── Docker-build.png
+│   ├── Merge-pipeline.png
+│   ├── Staging-smoke-test.png
+│   ├── Production-approval.png
+│   └── Slack-notification.png
 ├── requirements.txt
 ├── .gitignore
-├── .venv
 └── README.md
 ```
 ## PR Validation Pipeline (Pull Request Checks) :
@@ -150,10 +167,10 @@ The PR validation pipeline includes:
 - Source code checkout
 - Static checks (syntax / linting)
 - Secret scanning
-- Dependency or vulnerability checks
+- Security and vulnerability checks
 - Validation steps required before approval
 
-All checks must pass successfully before the pull request can be approved and merged into the main branch.
+All checks must pass successfully before the pull request can be approved and merged into the assessment branch.
 
 This stage ensures that only **verified and reviewed changes** proceed to the merge pipeline, reducing the risk of failures during deployment.
 
@@ -161,16 +178,13 @@ This stage ensures that only **verified and reviewed changes** proceed to the me
 
 <img width="1351" height="1169" alt="github com_rajkumardubey10_Devops-CI_actions_runs_20775615274" src="https://github.com/user-attachments/assets/07bb5b88-6d03-47f7-a2fc-9ede389a51fe" />
 
-This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request
-was merged into the `main` branch. The pipeline runs automatically on every push to the main branch
-and performs post-merge validations and build steps required for deployment readiness.
+This screenshot shows the successful execution of the Merge CI pipeline triggered after the pull request was merged into the `assessment` branch.
 
-The pipeline includes a **SonarQube quality scan** to enforce **code quality gates**, a **Docker build and push**
-step to create the application container image, a **Trivy image vulnerability scan** to ensure container security, and a step to securely access the CD repository for deployment-related updates.
+The pipeline performs SonarQube quality validation, Docker image build and push, Trivy image vulnerability scanning, GitOps manifest update, staging deployment verification, staging smoke testing, manual production approval, production deployment, and Slack notification.
 
-All stages completed successfully, confirming that the merged code meets quality standards, the
-container image is built and scanned without critical vulnerabilities, and the application is
-ready for the continuous delivery process
+All required stages completed successfully, confirming that the application passed CI validation and was successfully promoted through the staging and production deployment flow.
+
+![Merge Pipeline](screenshots/Merge-pipeline.png)
 
 ---
 
@@ -204,7 +218,7 @@ A successful Quality Gate validation confirms that the codebase complies with de
 
 **Description**  
 - This CI pipeline execution failed during the **Trivy vulnerability scanning stage**, which is configured to run in **fail-safe mode**.  
-- The scan detected multiple **HIGH severity vulnerabilities** within project dependencies, causing the job to exit with a non-zero status.
+- The scan detected vulnerabilities that caused the configured security threshold to fail.
 
 As part of secure CI/CD enforcement, the pipeline was automatically stopped to prevent the build and deployment of artifacts containing known security risks.  
 This demonstrates proactive **container and dependency security scanning** aligned with DevSecOps best practices.
@@ -251,21 +265,29 @@ This screenshot shows an **SSH key added to the GitHub user account**.
 
 ## 🔄 How CI and CD Repositories Work Together
 
-1. Code is merged into the `main` branch
-2. The **Merge CI pipeline** builds and scans the Docker image
-3. CI pipeline uses the **deploy key** to access the CD repository
-4. The pipeline updates Kubernetes `deployment.yml` with the new image tag
-5. GitOps tools (e.g., Argo CD) detect the change and deploy automatically
+1. Code is merged into the `assessment` branch.
+2. The Merge CI pipeline builds and scans the Docker image.
+3. CI uses the deploy key to securely access the CD repository.
+4. The pipeline updates Kubernetes `deployment.yml` with the new image tag.
+5. The change is committed and pushed to the CD repository.
+6. Argo CD detects the Git change and synchronizes the Kubernetes deployment.
+7. The staging deployment is verified using Kubernetes rollout checks and a smoke test.
+8. Production deployment requires manual approval.
+9. Slack receives the final CI/CD pipeline status.
 
 ---
 
 ## 🎯 Key Takeaway
 
-By separating **CI and CD repositories** and using **SSH keys and deploy keys**, this setup:
-- Improves security
-- Avoids credential leakage
-- Enables clean GitOps workflows
-- Matches real-world enterprise DevOps practices
+By separating CI and CD repositories and using SSH keys and deploy keys, this setup:
+
+* Improves security
+* Avoids credential leakage
+* Enables clean GitOps workflows
+* Validates staging deployments before production promotion
+* Provides controlled manual approval for production
+* Provides Slack-based deployment visibility
+* Matches real-world enterprise DevOps practices
 
 ## 🔁 GitOps Image Tag Update & Docker Registry Verification
 
@@ -297,3 +319,65 @@ Example:
 image: rajkumardockerhub/fastapi-ci:c40abbbd5c5be535f604b5ddd6ccf70b70a6c77a
 ```
 For CD Part Checkout this Repo Link : https://github.com/rajkumardubey10/CD-repo-for-Gitops.git
+
+---
+
+## 🧪 Staging Deployment & Smoke Test
+
+After the CI pipeline updates the image tag in the CD repository, Argo CD detects the change and synchronizes the application to the staging Kubernetes environment.
+
+The pipeline then verifies the staging deployment before production promotion.
+
+### Staging Verification includes:
+
+* Kubernetes deployment rollout verification
+* Verification that the expected image is deployed
+* HTTP smoke test against the application
+* Health endpoint validation
+
+The smoke test validates:
+
+```text
+GET /health
+Expected response: {"status":"ok"}
+```
+---
+
+## 🔐 Manual Production Deployment Approval
+
+Production deployment is protected using a GitHub Environment with manual approval.
+
+After the staging deployment and smoke test succeed, the pipeline pauses and waits for an authorized reviewer to approve the production deployment.
+
+### Production deployment flow
+
+```text
+Staging Deployment
+        ↓
+Staging Verification
+        ↓
+Manual Production Approval
+        ↓
+Production Deployment
+```
+
+---
+
+## 📢 Slack CI/CD Notifications
+
+Slack notifications are integrated into the CI/CD pipeline to provide visibility into pipeline execution.
+
+The pipeline sends notifications for both successful and failed executions.
+
+### Notifications provide:
+
+* Pipeline status
+* Success or failure indication
+* Failed stage information when applicable
+
+Example failure notification:
+
+```text
+CI/CD Pipeline Failed
+Stage: Staging Verification
+Status: FAILED
