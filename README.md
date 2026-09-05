@@ -319,7 +319,7 @@ Example:
 ```yaml
 image: rajkumardockerhub/fastapi-app-multistage:c15cd1ba9f733261f0c226ef81f7ef37a52ac10f
 ```
-For CD Part Checkout this Repo Link : https://github.com/rajkumardubey10/CD-repo-for-Gitops.git
+
 
 ---
 
@@ -400,3 +400,4 @@ CI/CD Pipeline Success
 Stage: None
 Status: SUCCESSFUL
 ```
+For CD Part Checkout this Repo Link : [https://github.com/rajkumardubey10/CD-repo-for-Gitops.git](https://github.com/rajkumardubey10/CD-repo-for-Gitops/tree/assessment)
